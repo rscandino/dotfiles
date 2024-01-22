@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+out="catsum.txt"
+
+if !(command -v fd > /dev/null 2>&1); then
+    echo "catsum: fd binary not found."
+    return 1
+fi
+
+fd --type f --print0 --exclude "/$out" \
+    | sort -z \
+    | while IFS= read -r -d "" f; do
+        printf '===== %s =====\n' "$f"
+        cat "$f"
+        printf '\n'
+    done > "$out"
+
+echo "catsum: $PWD/$out"
