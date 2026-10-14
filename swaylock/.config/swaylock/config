@@ -1,0 +1,14 @@
+image=~/Pictures/Wallpapers/wallhaven-9o2w9k.png
+ring-color=121417
+inside-color=000000
+inside-clear-color=000000
+ring-clear-color='bc9f76'
+inside-ver-color=000000
+ring-ver-color=344252
+inside-wrong-color=000000
+ring-wrong-color='bf8585'
+bs-hl-color=bf8585
+font='Maple Mono'
+indicator-idle-visible
+indicator-radius=80
+key-hl-color=344252

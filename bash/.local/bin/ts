@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIRS=(
+    "$HOME/Projects/Personal"
+    "$HOME/Projects/Work"
+)
+
+# Prints menu lines as: label<TAB>path
+# Takes PROJECT_DIRS or similar array as input
+
+build_list() {
+    local dir repo label s
+    local -A tmux_seen=()
+
+    # New session option
+    printf '%s\t%s\n' "New Session" "$PWD"
+
+    while IFS= read -r s; do
+        tmux_seen[$s]=1
+        printf '%s\t\n' "$s"
+    done < <(tmux list-sessions -F '#S' 2>/dev/null)
+
+    # Project repos
+    for dir in "$@"; do
+        dir=${dir%/}
+        [[ -d $dir ]] || continue
+        for repo in "$dir"/*/; do
+            [[ -d $repo ]] || continue
+            repo=${repo%/}
+            label="${dir##*/}/${repo##*/}"
+
+            # if dir has . or : in name tmux sessions will be with _
+            # so check for that
+            [[ -n ${tmux_seen[${label//[.:]/_}]+x} ]] && continue
+
+            printf '%s\t%s\n' "$label" "$repo"
+        done
+    done
+}
+
+
+main() {
+    command -v tmux >/dev/null 2>&1 || { echo 'tmux not found' >&2; return 1; }
+    command -v fzf  >/dev/null 2>&1 || { echo 'fzf not found'  >&2; return 1; }
+
+    local line label cwd name
+    line=$(build_list "${PROJECT_DIRS[@]}" \
+        | sort -u \
+        | uniq \
+        | fzf --height 40% --delimiter=$'\t' --with-nth=1) || return 0
+    [[ -n $line ]] || return 0
+
+    # split at the tab
+    label=${line%%$'\t'*}
+    cwd=${line#*$'\t'}
+
+    if [[ $label == "New Session" ]]; then
+        read -r -p "Session name: " name
+        [[ -n $name ]] || return 0
+    else
+        name=$label
+    fi
+
+    [[ -n $cwd ]] || cwd=$PWD
+    name=${name//[.:]/_}
+
+    tmux has-session -t "=$name" 2>/dev/null \
+        || tmux new-session -d -s "$name" -c "$cwd"
+
+    if [[ -n ${TMUX:-} ]]; then
+        tmux switch-client -t "=$name"
+    else
+        tmux attach-session -t "=$name"
+    fi
+}
+
+main

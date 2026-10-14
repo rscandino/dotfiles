@@ -1,0 +1,7 @@
+[default]
+kduration="30m"
+mode="stretch" #center, tile, fit, stretch
+sorting="random"
+
+[any]
+path="/home/riccardo/Pictures/Wallpapers"

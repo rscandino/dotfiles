@@ -1,22 +1,13 @@
-# Linux dotfiles
+# Dotfiles
 
-Personal dotfiles for terminal applications.
+To stow everything with target dir:
 
-Clone repo in a `.dotfiles` directory
-
-```shell
-git clone git@github.com:rflocfloc/dotfiles.git ~/.dotfiles
+```bash
+stow */ --target ~
 ```
 
-and create symlink where you need or use [stow](https://www.gnu.org/software/stow/).
+Else, specify single targets:
 
-## Stow usage
-
-Run `stow` followed by the *dotfile directory/ies* you want to link:
-
-```shell
-stow -S git tmux vim starship   # Stow links for git, tmux, vim, and starship
-stow git tmux vim starship      # Alternative syntax for -S
-stow -D git                     # Unlinks git files
-stow -R vim                     # Unliks and re-Stow vim
+```bash
+stow bash tmux alacritty --target ~
 ```

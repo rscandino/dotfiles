@@ -1,0 +1,40 @@
+# Core Terminal Background and Foreground
+background = 0E1419
+foreground = e2e2e2
+
+# Cursor & Selection Styles
+cursor-color = ffb4ab
+selection-background = 474747
+selection-foreground = ffffff
+
+# Tab Bar Matching [tabs] & [mode]
+palette = 0=131313
+palette = 8=303030
+
+# Red: Find keywords, error permissions, app/executables
+palette = 1=ffb4ab
+palette = 9=ffdad6
+
+# Green: Documents/Mimetypes fallback
+palette = 2=a6e3a1
+palette = 10=a6e3a1
+
+# Yellow: Audio/Video mimetypes
+palette = 3=f9e2af
+palette = 11=f9e2af
+
+# Blue: Custom structural elements (Subtle Gray-Blue representation)
+palette = 4=6aa2de
+palette = 12=c6c6c6
+
+# Magenta: Archives mimetype
+palette = 5=f5c2e7
+palette = 13=f5c2e7
+
+# Cyan: Images mimetype
+palette = 6=94e2d5
+palette = 14=94e2d5
+
+# White: Borders, Active Tabs, Highlights
+palette = 7=e2e2e2
+palette = 15=ffffff

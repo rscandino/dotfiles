@@ -1,0 +1,21 @@
+// --- Startup Spawn
+spawn-at-startup "swayidle" "-w" "timeout" "300" "'swaylock -f'" "timeout" "600" "'niri msg action power-off-monitors; systemctl suspend'" "before-sleep" "'swaylock -f'"
+spawn-at-startup "swayosd-server"
+spawn-at-startup "swaybg" "-i" "/home/riccardo/Pictures/Wallpapers/wallhaven-vg52ql.png"
+
+
+// --- MISC ---
+prefer-no-csd
+hotkey-overlay {
+    skip-at-startup
+}
+xwayland-satellite {
+    path "xwayland-satellite"
+}
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+include "./config/input.kdl"
+include "./config/rules.kdl"
+include "./config/layout.kdl"
+include "./config/bindings.kdl"
+include "./config/animations.kdl"

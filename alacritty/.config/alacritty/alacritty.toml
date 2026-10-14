@@ -1,0 +1,24 @@
+[font]
+normal={family="Maple Mono",style="Regular"}
+
+[window]
+padding={x=20,y=20}
+decorations="None"
+# startup_mode = "Maximized"
+
+[colors.primary]
+background="#0e1419"
+foreground="#e2e2e2"
+
+[colors.normal]
+black="#131313"
+red="#ffb4ab"
+green="#a6e3a1"
+yellow="#E8EDA2"
+blue="#6aa2de"
+magenta="#f5c2e7"
+cyan="#94e2d5"
+white="#e2e2e2"
+
+[colors]
+vi_mode_cursor={text="#e2e2e2", cursor="#BAA0E8"}

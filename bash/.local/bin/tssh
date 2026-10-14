@@ -1,0 +1,66 @@
+#!/bin/bash
+
+SSH_HOSTS="$HOME/.ssh/config.d/hosts"
+HOSTS_TO_IGNORE=(
+    "github.com"
+)
+
+
+function in_array(){
+    local search="$1"; shift
+    local item
+    for item in "$@"; do
+        [[ "$item" == "$search" ]] && return 0
+    done
+    return 1
+}
+
+function get_hosts() {
+    if [[ ! -f $SSH_HOSTS ]]; then
+        printf '%s not found.\n' "$SSH_HOSTS" >&2
+        return 1
+    fi
+
+    local known_hosts h s user out rc
+    local sessions=()
+
+    mapfile -t known_hosts < <(
+        grep -hoP '^\s*Host\s+\K.+' "$SSH_HOSTS" | tr -s ', ' '\n' | grep -v '[*?!]' | sort -u
+    )
+
+    for h in "${known_hosts[@]}"; do
+        in_array "$h" "${HOSTS_TO_IGNORE[@]}" && continue
+
+        user=$(ssh -G "$h" | awk '$1=="user"{print $2}')
+
+        out=$(ssh -n -o BatchMode=yes -o ConnectTimeout=1 "$h" \
+                  'tmux list-sessions -F "#S"' 2>/dev/null)
+        rc=$?
+
+        # 255 = ssh failed, 1 = no tmux server / tmux missing
+        (( rc == 0 )) || continue
+
+        mapfile -t sessions <<< "$out"
+        for s in "${sessions[@]}"; do
+            [[ -n $s ]] && printf '%s\t%s\t[%s@%s]:%s\n' "$s" "$h" "$user" "$h" "$s"
+        done
+    done
+}
+
+function main() {
+    command -v ssh >/dev/null 2>&1 || { echo 'ssh not found' >&2; return 1; }
+    command -v tmux >/dev/null 2>&1 || { echo 'tmux not found' >&2; return 1; }
+    command -v fzf  >/dev/null 2>&1 || { echo 'fzf not found'  >&2; return 1; }
+
+    local line label cwd name
+    line=$(get_hosts \
+        | fzf --height 40% --delimiter='\t' --with-nth=3) || return 0
+    [[ -n $line ]] || return 0
+
+    name=$(echo "$line" | awk '{print $1}')
+    host=$(echo "$line" | awk '{print $2}')
+
+    ssh -t "$host" 'tmux attach -t "$name"'
+}
+
+main

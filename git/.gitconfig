@@ -1,35 +1,38 @@
 [user]
-        name = rflocfloc
-        email = riccardoscandino@gmail.com
+	name = riccardoscandinounitn
+	email = riccardo.scandino@unitn.it
+
+[github]
+user = "riccardoscandinounitn"
+
+[core]
+sshCommand = ssh -i ~/.ssh/id_ed25519_rscandino -F /dev/null
 
 [includeIf "gitdir:~/Projects/Personal/"]
-    path = ~/.gitconfig_personal
-
-[includeIf "gitdir:~/Projects/Work/"]
-    path = ~/.gitconfig_work
-
-[color]
-	ui	= auto
-
-[pretty]
-	better-oneline = "format:%C(auto)%h%d %s %Cblue[%cn]"
-
-[alias]
-	s	= status
-	c	= commit
-	co	= checkout
-
-	a   = !cd ${GIT_PREFIX:-.} && git add . && git s
-	aa  = !git add -A && git s
- 	ac  = !cd ${GIT_PREFIX:-.} && git add . && git c
-	aac = !git add -A && git c
-
-	tree    = log --pretty=better-oneline --all --graph
-	ls      = log --pretty=better-oneline
-	ll      = log --pretty=better-oneline --numstat
-	details = "!f() { git ll "$1"^.."$1"; }; f"
-
-	
+    path = ~/.gitconfig.personal
 
 [init]
-	defaultBranch = main
+    defaultBranch = main
+
+[color]
+    ui    = auto
+
+[pretty]
+    better-oneline = "format:%C(auto)%h%d %s %Cblue[%cn]"
+
+[alias]
+    s    = status
+    c    = commit
+    co    = checkout
+
+    a   = !cd ${GIT_PREFIX:-.} && git add . && git s
+    aa  = !git add -A && git s
+     ac  = !cd ${GIT_PREFIX:-.} && git add . && git c
+    aac = !git add -A && git c
+
+    tree    = log --pretty=better-oneline --all --graph
+    ls      = log --pretty=better-oneline
+    ll      = log --pretty=better-oneline --numstat
+    details = "!f() { git ll "$1"^.."$1"; }; f"
+[credential]
+	helper = cache
