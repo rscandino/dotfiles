@@ -31,6 +31,7 @@ binds {
 
     // Core commands
     // Mod+S { spawn-sh "qs -c quick-dash ipc call dashboard toggle"; }
+    Mod+S { spawn-sh "fuzzel_switch_repo"; }
     Ctrl+Alt+L {spawn-sh "swaylock" ; }
     Mod+Alt+Q {spawn-sh ". ~/.local/bin/session-menu.sh"; }
 
