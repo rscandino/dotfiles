@@ -4,7 +4,7 @@ normal={family="Maple Mono",style="Regular"}
 [window]
 padding={x=20,y=20}
 decorations="None"
-# startup_mode = "Maximized"
+startup_mode = "Maximized"
 
 [colors.primary]
 background="#0e1419"
