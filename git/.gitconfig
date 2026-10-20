@@ -6,9 +6,9 @@
 user = "riccardoscandinounitn"
 
 [core]
-sshCommand = ssh -i ~/.ssh/id_ed25519_rscandino -F /dev/null
+sshCommand = ssh -i ~/.ssh/id_ed25519_riccardoscandinounitn -F /dev/null
 
-[includeIf "gitdir:~/Projects/Personal/"]
+[includeIf "gitdir:~/Projects/"]
     path = ~/.gitconfig.personal
 
 [init]
@@ -21,13 +21,6 @@ sshCommand = ssh -i ~/.ssh/id_ed25519_rscandino -F /dev/null
     better-oneline = "format:%C(auto)%h%d %s %Cblue[%cn]"
 
 [alias]
-    s    = status
-    c    = commit
-    co    = checkout
-
-    a   = !cd ${GIT_PREFIX:-.} && git add . && git s
-    aa  = !git add -A && git s
-     ac  = !cd ${GIT_PREFIX:-.} && git add . && git c
     aac = !git add -A && git c
 
     tree    = log --pretty=better-oneline --all --graph
