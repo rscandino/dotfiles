@@ -22,6 +22,7 @@ pick_default_editor(){
 export EDITOR=$(pick_default_editor)
 export VISUAL="$EDITOR"
 export PAGER=less
+export PATH="$PATH:~/.local/bin/"
 
 # Support colors in man pages
 export LESS_TERMCAP_mb=$'\e[1;31m'
@@ -89,20 +90,57 @@ get_color() {
     esac
 }
 
+#
 # Construct the prompt PS1
-# [(exit code)] <user>: <cwd> [git branch] <$|#>
+#
+# [(exit code)] <user>: <cwd> (nix:shell) (git:branch) <$|#>
+
+# Remember the original PATH, exported so nested shells inherit it
+export __BASE_PATH="${__BASE_PATH:-$PATH}"
+
+# Wrapp get color with raw \[ symbols for bash
+__c() { printf '\001%s\002' "$(get_color "$1")"; }
+
+# NIX shell/develop optional module DEVSHELL_NAME must be specified in nix devShell
+__nix_prompt() {
+  local tag=""
+  if [[ -n "$DEVSHELL_NAME" ]]; then
+    tag="nix:$DEVSHELL_NAME"
+  elif [[ -n "$IN_NIX_SHELL" ]]; then
+    tag="nix"
+  elif [[ "$PATH" != "$__BASE_PATH" && ":$PATH:" == *":/nix/store/"* ]]; then
+    tag="nix"
+  fi
+
+  [[ -n $tag ]] && printf '%s%s(%s)%s' \
+      "$(__c bold)" "$(__c cyan)" "$tag" "$(__c sgr0)"
+}
+
+# GIT repo optional module
+__git_prompt() {
+  local branch
+  branch=$(git symbolic-ref --short -q HEAD 2>/dev/null \
+        || git rev-parse --short HEAD 2>/dev/null) || return
+
+  [[ -n $branch ]] && printf '%s%s(git:%s)%s' \
+      "$(__c bold)" "$(__c green)" "$branch" "$(__c sgr0)"
+}
 
 # exit code of last process
 PS1='$(ret=$?;(($ret!=0)) && echo "\[$(get_color red)\]($ret) \[$(get_color sgr0)\]")'
 
+
 # username (red for root)
-PS1+='\[$(get_color )\]\[$(get_color bold)\]$(((UID==0)) && echo "\[$(get_color red)\]")\u\[$(get_color bold)\]:'
+PS1+='\[$(get_color )\]\[$(get_color bold)\]$(((UID==0)) && echo "\[$(get_color red)\]")\u@\h\[$(get_color bold)\]:'
 
 # cwd
 PS1+='\[$(get_color blu)\]\w '
 
+# optional nix shell
+PS1+='$(__nix_prompt)'
+
 # optional git branch
-PS1+='$(branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); [[ -n $branch ]] && echo "\[$(get_color sgr0)\]\[$(get_color)\](git:\[$(get_color green)\]$branch\[$(get_color)\]) ")'
+PS1+='$(__git_prompt)'
 
 # prompt character
 PS1+='\[$(get_color)\]\$\[$(get_color sgr0)\] '
