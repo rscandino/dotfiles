@@ -52,8 +52,9 @@ _prompt_command() {
         [[ -n $SSH_CLIENT ]] && ssh='[ssh] '
         printf "\033]0;%s%s@%s:%s\007" "$ssh" "$user" "$host" "$pwd"
 }
+
 # updates tab/window title
-PROMPT_COMMAND=_prompt_command
+PROMPT_COMMAND="_prompt_command${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
 # set and retrieve color code
 # takes one argument as 'case'; no arguments returns white code

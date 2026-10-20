@@ -1,5 +1,0 @@
-# Set up zoxide key bindings
-which zoxide &> /dev/null;
-if [ $? -eq 0 ]; then
-  eval "$(zoxide init bash --cmd cd)"
-fi
