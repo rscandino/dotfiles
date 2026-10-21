@@ -130,7 +130,6 @@ __git_prompt() {
 # exit code of last process
 PS1='$(ret=$?;(($ret!=0)) && echo "\[$(get_color red)\]($ret) \[$(get_color sgr0)\]")'
 
-
 # username (red for root)
 PS1+='\[$(get_color )\]\[$(get_color bold)\]$(((UID==0)) && echo "\[$(get_color red)\]")\u@\h\[$(get_color bold)\]:'
 
@@ -176,6 +175,11 @@ fi
 which zoxide &> /dev/null;
 if [[ $? -eq 0 ]]; then
     eval "$(zoxide init bash --cmd cd)"
+fi
+
+which jj &> /dev/null;
+if [[ $? -eq 0 ]]; then
+    source <(jj util completion bash)
 fi
 
 which fzf &> /dev/null;

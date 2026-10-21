@@ -1,4 +1,0 @@
-which jj &> /dev/null;
-if [ $? -eq 0 ]; then
-    source <(jj util completion bash)
-fi
