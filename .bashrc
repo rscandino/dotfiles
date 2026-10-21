@@ -96,11 +96,14 @@ get_color() {
 #
 # [(exit code)] <user>: <cwd> (nix:shell) (git:branch) <$|#>
 
+# Wrapp get color with raw \[ symbols for bash
+__c() { printf '\001%s\002' "$(get_color "$1")"; }
+
 # Remember the original PATH, exported so nested shells inherit it
 export __BASE_PATH="${__BASE_PATH:-$PATH}"
 
-# Wrapp get color with raw \[ symbols for bash
-__c() { printf '\001%s\002' "$(get_color "$1")"; }
+# NVIM builtin shell false positive
+[[ -n "$NVIM" ]] && __BASE_PATH="$PATH"
 
 # NIX shell/develop optional module DEVSHELL_NAME must be specified in nix devShell
 __nix_prompt() {
