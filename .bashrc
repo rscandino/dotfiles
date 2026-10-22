@@ -56,7 +56,7 @@ _prompt_command() {
 # updates tab/window title
 PROMPT_COMMAND="_prompt_command${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
-# set and retrieve color code
+# Set and retrieve color code
 # takes one argument as 'case'; no arguments returns white code
 get_color() {
     local h=${1:-0}
@@ -120,7 +120,7 @@ __nix_prompt() {
       "$(__c bold)" "$(__c cyan)" "$tag" "$(__c sgr0)"
 }
 
-# GIT repo optional module
+# GIT optional module
 __git_prompt() {
   local branch
   branch=$(git symbolic-ref --short -q HEAD 2>/dev/null \
@@ -128,6 +128,42 @@ __git_prompt() {
 
   [[ -n $branch ]] && printf '%s%s(git:%s)%s' \
       "$(__c bold)" "$(__c green)" "$branch" "$(__c sgr0)"
+}
+
+# JJ versioning optional
+command -v jj &>/dev/null && __HAVE_JJ=1
+
+__in_jj_repo() {
+  [[ -n $__HAVE_JJ ]] || return 1
+  local d=$PWD
+  while [[ -n $d ]]; do
+    [[ -d $d/.jj ]] && return 0
+    d=${d%/*}
+  done
+  [[ -d /.jj ]]
+}
+
+__jj_prompt() {
+  __in_jj_repo || return 1
+
+  local info
+  info=$(jj log --no-graph --ignore-working-copy --color never -r @ \
+      -T 'separate(" ",
+            change_id.shortest(4),
+            bookmarks,
+            if(conflict, "×"),
+            if(empty, "∅")
+          )' 2>/dev/null) || return 1
+
+  [[ -n $info ]] && printf '%s%s(jj:%s)%s ' \
+      "$(__c bold)" "$(__c magenta)" "$info" "$(__c sgr0)"
+}
+
+
+# Global versioning
+__vcs_prompt() {
+  __jj_prompt && return
+  __git_prompt
 }
 
 # exit code of last process
@@ -143,7 +179,7 @@ PS1+='\[$(get_color blu)\]\w '
 PS1+='$(__nix_prompt)'
 
 # optional git branch
-PS1+='$(__git_prompt)'
+PS1+='$(__vcs_prompt)'
 
 # prompt character
 PS1+='\[$(get_color)\]\$\[$(get_color sgr0)\] '
