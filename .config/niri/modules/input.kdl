@@ -1,0 +1,23 @@
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        numlock
+        // Delay before repeat starts in milliseconds (lower = faster response)
+        repeat-delay 600
+        // Number of characters sent per second (higher = faster movement)
+        repeat-rate 50
+    }
+    touchpad {
+        tap
+        natural-scroll
+        scroll-method "two-finger"
+    }
+
+    mouse {
+    }
+    trackpoint {
+        off
+    }
+}
