@@ -2,8 +2,8 @@
 set -euo pipefail
 
 PROJECT_DIRS=(
-    "$HOME/Projects/Personal"
-    "$HOME/Projects/Work"
+    "$HOME/Projects"
+    "$HOME/CIBIO"
 )
 
 # Prints menu lines as: label<TAB>path

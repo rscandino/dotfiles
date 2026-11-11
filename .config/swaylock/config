@@ -1,14 +1,44 @@
-image=~/Pictures/Wallpapers/wallhaven-9o2w9k.png
-ring-color=121417
-inside-color=000000
-inside-clear-color=000000
-ring-clear-color='bc9f76'
-inside-ver-color=000000
-ring-ver-color=344252
-inside-wrong-color=000000
-ring-wrong-color='bf8585'
-bs-hl-color=bf8585
-font='Maple Mono'
-indicator-idle-visible
-indicator-radius=80
-key-hl-color=344252
+image=~/Pictures/Wallpapers/wallhaven-qr3mpq.png
+scaling=fill
+color=2d2d40
+
+indicator-radius=90
+indicator-thickness=8
+indicator-caps-lock
+show-failed-attempts
+
+font=JetBrains Mono
+font-size=22
+
+# Opaque inside so the planet doesn't bleed through
+inside-color=2d2d40f2
+inside-ver-color=2d2d40f2
+inside-wrong-color=2d2d40f2
+inside-clear-color=2d2d40f2
+inside-caps-lock-color=2d2d40f2
+
+# Idle ring: light, so it stands out against the dark inside
+ring-color=ddd8dc
+ring-ver-color=e8cfae
+ring-wrong-color=e8806a
+ring-clear-color=e8cfae
+ring-caps-lock-color=e8cfae
+
+# Key press / backspace highlights: strongly contrasting segments
+key-hl-color=e8806a
+bs-hl-color=2d2d40
+caps-lock-key-hl-color=e8806a
+caps-lock-bs-hl-color=2d2d40
+
+# Separators between segments, visible on both ring colors
+separator-color=2d2d40
+
+# Text
+text-color=ddd8dc
+text-ver-color=ddd8dc
+text-wrong-color=e8806a
+text-clear-color=e8cfae
+text-caps-lock-color=e8cfae
+
+ignore-empty-password
+daemonize

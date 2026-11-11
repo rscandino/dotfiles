@@ -27,25 +27,27 @@ binds {
 
     // Run Apps
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "alacritty"; }
-    Mod+Space hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
+    Mod+D hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
+    Mod+E hotkey-overlay-title="Run firefox" { spawn "firefox"; }
+    Mod+I hotkey-overlay-title="Run chrome" { spawn "google-chrome-stable"; }
+    Mod+S { spawn ".local/bin/fs"; }
 
     // Core commands
-    // Mod+S { spawn-sh "qs -c quick-dash ipc call dashboard toggle"; }
-    Ctrl+Alt+L {spawn-sh "swaylock" ; }
+    Ctrl+Alt+L {spawn-sh "veila lock"; }
 
     // Workspace Navigation
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
+    Mod+1 { focus-workspace "firefox"; }
+    Mod+2 { focus-workspace "chrome"; }
+    Mod+3 { focus-workspace "term"; }
     Mod+4 { focus-workspace 4; }
     Mod+5 { focus-workspace 5; }
     Mod+6 { focus-workspace 6; }
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
-    Mod+Shift+1 { move-column-to-workspace 1; }
-    Mod+Shift+2 { move-column-to-workspace 2; }
-    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+1 { move-column-to-workspace "firefox"; }
+    Mod+Shift+2 { move-column-to-workspace "chrome"; }
+    Mod+Shift+3 { move-column-to-workspace "term"; }
     Mod+Shift+4 { move-column-to-workspace 4; }
     Mod+Shift+5 { move-column-to-workspace 5; }
     Mod+Shift+6 { move-column-to-workspace 6; }

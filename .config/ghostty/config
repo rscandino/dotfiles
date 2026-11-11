@@ -10,11 +10,9 @@ window-title-font-family = "Maple Mono"
 # Window config:
 # Use the colors from my configuration for the window theme:
 window-theme = ghostty
-# handle maximize through system
-maximize = true
 gtk-titlebar = false
-window-padding-x = 10
-window-padding-y = 10
+window-padding-x = 20
+window-padding-y = 20
 
 # Splits:
 unfocused-split-opacity = 0.4

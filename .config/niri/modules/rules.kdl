@@ -1,4 +1,9 @@
 
+
+workspace "firefox"
+workspace "chrome"
+workspace "term"
+
 window-rule {
   geometry-corner-radius 8
   clip-to-geometry true
@@ -8,12 +13,20 @@ window-rule {
    match app-id="Alacritty"
    match app-id="ghostty"
    match app-id="foot"
+   match app-id="kitty"
    open-maximized true
+   open-on-workspace "term"
 }
 
 window-rule {
+    match app-id=r"^firefox"
     match app-id=r"firefox$"
-    match app-id="google-chrome"
+    open-on-workspace "firefox"
+}
+
+window-rule {
+    match app-id=r"^google-chrome"
+    open-on-workspace "chrome"
 }
 
 window-rule {

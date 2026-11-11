@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TERMINAL="ghostty"
+FUZZEL_FLAGS=(--dmenu -l 20 -w 60 -f 'JetBrainsMono Nerd Font:size=12' -p 'Projects: ')
+PROJECT_DIRS=(
+    "$HOME/Projects"
+    "$HOME/CIBIO"
+)
+
+MENU=()
+declare -A PATHS=()
+
+build_list() {
+    local dir repo label
+
+    MENU+=("Here ($PWD)")
+    PATHS["Here ($PWD)"]=$PWD
+
+    for dir in "$@"; do
+        dir=${dir%/}
+        [[ -d $dir ]] || continue
+        for repo in "$dir"/*/; do
+            [[ -d $repo ]] || continue
+            repo=${repo%/}
+            label="${dir##*/}/${repo##*/}"
+            MENU+=("$label")
+            PATHS[$label]=$repo
+        done
+    done
+}
+
+main() {
+    command -v fuzzel >/dev/null || { echo 'fuzzel not found' >&2; return 1; }
+
+    build_list "${PROJECT_DIRS[@]}"
+
+    local choice cwd
+    choice=$(printf '%s\n' "${MENU[@]}" | fuzzel "${FUZZEL_FLAGS[@]}") || exit 0
+    [[ -n $choice ]] || return 0
+
+    cwd=${PATHS[$choice]-}
+    [[ -d $cwd ]] || cwd=$HOME
+
+    # detach so the terminal doesn't depend on whoever launched this script
+    setsid -f "$TERMINAL" --working-directory="$cwd" --title="$choice" >/dev/null 2>&1
+}
+
+main

@@ -4,10 +4,8 @@ input {
             layout "us"
         }
         numlock
-        // Delay before repeat starts in milliseconds (lower = faster response)
-        repeat-delay 600
-        // Number of characters sent per second (higher = faster movement)
-        repeat-rate 50
+        repeat-delay 200
+        repeat-rate 35
     }
     touchpad {
         tap

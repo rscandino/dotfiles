@@ -1,12 +1,17 @@
 // --- Startup Spawn
-spawn-at-startup "swayidle" "-w" "timeout" "300" "'swaylock -f'" "timeout" "600" "'niri msg action power-off-monitors; systemctl suspend'" "before-sleep" "'swaylock -f'"
+// spawn-at-startup "swayidle" "-w" "timeout" "300" "'swaylock -f'" "timeout" "600" "'niri msg action power-off-monitors; systemctl suspend'" "before-sleep" "'swaylock -f'"
 spawn-at-startup "swayosd-server"
 spawn-at-startup "swaybg" "-i" "/home/riccardo/Pictures/Wallpapers/wallhaven-mlo6my_1920x1200.png"
 spawn-at-startup "xwayland-satellite"
 
 
+
 // --- MISC ---
 prefer-no-csd
+environment {
+    XDG_CURRENT_DESKTOP "niri"
+    XDG_SESSION_TYPE "wayland"
+}
 hotkey-overlay {
     skip-at-startup
 }
@@ -20,7 +25,6 @@ include "./modules/rules.kdl"
 include "./modules/layout.kdl"
 include "./modules/bindings.kdl"
 include "./modules/animations.kdl"
-
 
 cursor {
     xcursor-theme "Vimix-cursors" // Replace with your installed cursor theme name
