@@ -11,6 +11,8 @@ vim.keymap.set('n', 'n', 'nzzzv', { silent = true, desc = 'Next search result, c
 vim.keymap.set('n', 'N', 'Nzzzv', { silent = true, desc = 'Prev search result, centered' })
 vim.keymap.set('n', '<C-o>', '<C-o>zz', { silent = true, desc = 'Jump back, centered' })
 vim.keymap.set('n', '<C-i>', '<C-i>zz', { silent = true, desc = 'Jump forward, centered' })
+vim.keymap.set('n', 'gl', '$', { silent = true, desc = '$ remap' })
+vim.keymap.set('n', 'gh', '^', { silent = true, desc = '^ remap' })
 vim.keymap.set('c', 'dm', 'delmarks ', { desc = 'Delete marks, :delmarks shortcut' })
 vim.keymap.set('n', 'ZB', '<cmd>%bd|e#|bd#<CR>', { desc = 'Close other Buffers' })
 vim.keymap.set('x', '<leader>y', [["+y]], { noremap = true, silent = true, desc = 'Yank to system clipboard' })

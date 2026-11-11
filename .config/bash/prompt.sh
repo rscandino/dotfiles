@@ -138,7 +138,9 @@ render_nix() {
 render_prompt() {
     local label="$"
 
-    [[ $is_root ]] || label="#"
+    if is_root; then
+        label='#'
+    fi
 
     # Use bold label
     label="\001\033[1m\002$label\001\033[0m\002"
