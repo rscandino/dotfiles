@@ -10,6 +10,7 @@ config() {
     declare -g color_error="#EC6A88"
     declare -g color_primary="#f5992e"
     declare -g color_secondary="#785cea"
+    declare -g color_tertiary="#E8EDA2"
     declare -g color_neutral="#5f5f87"
     declare -g color_vcs="#87E58E"
     declare -g color_nix="#00DFDF"
@@ -18,6 +19,8 @@ config() {
     # Define main color
     if is_root; then
         color_global=$color_secondary
+    elif is_ssh; then
+        color_global=$color_tertiary
     else
         color_global=$color_primary
     fi
