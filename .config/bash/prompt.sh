@@ -65,7 +65,7 @@ render_identity() {
     local label
 
     if is_ssh; then
-        label="ssh://$USER@$HOSTNAME:"
+        label="[ssh://] $USER@$HOSTNAME:"
     elif is_su; then
         label="$USER@$HOSTNAME:"
     elif is_vcs; then
@@ -145,10 +145,7 @@ render_prompt() {
         label='#'
     fi
 
-    # Use bold label
-    label="\001\033[1m\002$label\001\033[0m\002"
-
-    printf "%s " "$(make_label "$label")"
+    printf "%s " "$label"
 }
 
 ### Helpers

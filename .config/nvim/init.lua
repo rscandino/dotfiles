@@ -23,7 +23,15 @@ vim.cmd.packadd 'cfilter'
 
 -- Enable the new experimental command-line features
 vim.opt.cmdheight = 0
-require('vim._core.ui2').enable({enable = true})
+require('vim._core.ui2').enable({
+    enable = true,
+    msg = {
+    targets = {
+      bufwrite = 'msg',
+      shell_ret = 'msg',
+        }
+    }
+})
 
 -----------------------[ Options ]-----------------------
 
