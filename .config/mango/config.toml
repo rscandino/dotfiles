@@ -171,6 +171,9 @@ launcher = "fuzzel"
 "SUPER+Return" = "spawn,$term"
 "SUPER+d" = "spawn,$launcher"
 
+# Picker
+"SUPER+ALT+c" = "spawn,hyprpicker -a"
+
 # kill or exit
 "SUPER+ALT+e" = "quit"
 "SUPER+q" = "killclient,"

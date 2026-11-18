@@ -5,24 +5,24 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-# -------------[ Envinroment ]-------------
+# -------------[ Environment ]-------------
 HISTCONTROL='ignoredups'
 HISTSIZE=5000
 HISTFILESIZE=5000
 
-pick_default_editor(){
-    for editor in nvim vim vi; do
-        if command -v "$editor" >/dev/null 2>&1; then
-            echo "$editor"
-            return 0
-        fi
-    done
-    echo "nano"
-}
-export EDITOR=$(pick_default_editor)
+# Default editor
+for EDITOR in nvim vim vi nano; do
+    type -P "$EDITOR" >/dev/null && break
+done
+export EDITOR
 export VISUAL="$EDITOR"
 export PAGER=less
-export PATH="$PATH:~/.local/bin/"
+
+# Add .local/bin to PATH
+case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) export PATH="$PATH:$HOME/.local/bin" ;;
+esac
 
 # Support colors in man pages
 export LESS_TERMCAP_mb=$'\e[1;31m'
@@ -55,51 +55,58 @@ alias hl='rg --passthru'
 alias ..='echo "cd .."; cd ..'
 alias cd..='echo "cd .."; cd ..'
 
-which fdfind &> /dev/null;
-if [[ $? -eq 0 ]]; then
-    alias fd='fdfind'
+# Real binary names (aliases are not visible to fzf's child shells)
+_fd= _bat=
+if   type -P fd      >/dev/null; then _fd=fd
+elif type -P fdfind  >/dev/null; then _fd=fdfind; alias fd='fdfind'; fi
+if   type -P bat     >/dev/null; then _bat=bat
+elif type -P batcat  >/dev/null; then _bat=batcat; alias bat='batcat'; fi
+
+if type -P eza >/dev/null; then
+    alias le="eza -l --icons --tree --git --git-ignore --short-nix --group-directories-last"
 fi
 
-which batcat &> /dev/null;
-if [[ $? -eq 0 ]]; then
-  alias bat='batcat'
-fi
+# -------------[ Eval Tools (cached) ]-------------
+# `tool init`/`completion` output is cached in ~/.cache/bash and re-generated
+# only when the binary is newer than the cache. If a tool is upgraded and its
+# binary mtime doesn't change (e.g. nix), run: rm -rf ~/.cache/bash
+_cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/bash
 
-which eza &> /dev/null;
-if [[ $? -eq 0 ]]; then
-  alias le="eza -l --icons --tree --git --git-ignore --short-nix --group-directories-last"
-fi
+__which() {     # PATH lookup without forking; result in REPLY
+    local d IFS=:
+    for d in $PATH; do
+        [[ -x $d/$1 && ! -d $d/$1 ]] && { REPLY=$d/$1; return 0; }
+    done
+    return 1
+}
 
-# -------------[ Eval Tools ]-------------
-which zoxide &> /dev/null;
-if [[ $? -eq 0 ]]; then
-    eval "$(zoxide init bash --cmd cd)"
-fi
-
-which jj &> /dev/null;
-if [[ $? -eq 0 ]]; then
-    source <(jj util completion bash)
-fi
-
-which fzf &> /dev/null;
-if [[ $? -eq 0 ]]; then
-    eval "$(fzf --bash)"
-
-    which fd &> /dev/null;
-    if [[ $? -eq 0 ]]; then
-        export FZF_DEFAULT_COMMAND="fd --type f"
+__source_cached() {     # __source_cached NAME CMD [ARGS...]
+    local name=$1 f; shift
+    f=$_cache_dir/$name.bash
+    __which "$1" || return 1
+    if [[ ! -s $f || $REPLY -nt $f ]]; then
+        mkdir -p "$_cache_dir" && "$@" >"$f.tmp" 2>/dev/null && mv -f "$f.tmp" "$f" \
+            || { rm -f "$f.tmp"; return 1; }
     fi
+    source "$f"
+}
 
-    which_cat='cat'
-    which bat &> /dev/null;
-    if [[ $? -eq 0 ]]; then
-        which_cat='bat'
+__source_cached zoxide zoxide init bash --cmd cd
+__source_cached jj     jj util completion bash
+
+if __source_cached fzf fzf --bash; then
+    [[ -n $_fd ]] && export FZF_DEFAULT_COMMAND="$_fd --type f"
+
+    if [[ -n $_bat ]]; then
+        _preview="$_bat -n --color=always {}"
+    else
+        _preview="cat -n {}"
     fi
-
     export FZF_CTRL_T_OPTS="
     --walker-skip .git,node_modules,target
-    --preview '"$which_cat" -n --color=always {}'
+    --preview '$_preview'
     --bind 'ctrl-/:change-preview-window(|hidden|)'"
+    unset _preview
 
     export FZF_DEFAULT_OPTS=" \
         --border top \
@@ -110,7 +117,7 @@ if [[ $? -eq 0 ]]; then
         --color=selected-bg:#51576D \
         --color=border:#737994,label:#C6D0F5"
 fi
+unset _fd _bat
 
-
-# -------------[ Prompt  PS1]-------------
+# -------------[ Prompt PS1 ]-------------
 [[ -f ~/.config/bash/prompt.sh ]] && source ~/.config/bash/prompt.sh

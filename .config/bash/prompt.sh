@@ -1,107 +1,71 @@
 #!/bin/bash
 
-### Setup
-config() {
-    # Define prompt segments
-    declare -ag segments=(error identity path vcs nix nvim prompt)
-    declare -ag dynamics=(error identity vcs nix nvim)
-
-    # Define custom colors
-    declare -g color_error="#EC6A88"
-    declare -g color_primary="#f5992e"
-    declare -g color_secondary="#785cea"
-    declare -g color_tertiary="#E8EDA2"
-    declare -g color_neutral="#5f5f87"
-    declare -g color_vcs="#87E58E"
-    declare -g color_nix="#00DFDF"
-    declare -g color_global
-
-    # Define main color
-    if is_root; then
-        color_global=$color_secondary
-    elif is_ssh; then
-        color_global=$color_tertiary
-    else
-        color_global=$color_primary
-    fi
-
-    # Define prompt variables
-    PS1=""
-    PS2="→ "
-    PROMPT_DIRTRIM=2
+# __fg VAR "#rrggbb"  -> VAR = truecolor foreground escape, readline-safe
+__fg() {
+    local hex=${2#\#}
+    printf -v "$1" '\001\e[38;2;%d;%d;%dm\002' \
+        "$((16#${hex:0:2}))" "$((16#${hex:2:2}))" "$((16#${hex:4:2}))"
 }
 
-init() {
-    for segment in "${segments[@]}"; do
-        local renderer="render_$segment"
-
-        # Skip segments without renderers
-        if ! declare -F "$renderer" > /dev/null; then continue; fi
-
-        if [[ "${dynamics[*]}" == *"$segment"* ]]; then
-            # Evaluate every time
-            PS1+="\$($renderer)"
-        else
-            # Evaluate only once
-            PS1+="$($renderer)"
-        fi
+# Find nearest .jj and .git roots from $PWD. Sets _jj_root / _git_root.
+__find_vcs() {
+    local d=$PWD
+    _jj_root= _git_root=
+    while :; do
+        [[ -z $_jj_root  && -d $d/.jj ]] && _jj_root=$d
+        [[ -z $_git_root && -e $d/.git ]] && _git_root=$d   # .git may be a file (worktree)
+        [[ -n $_jj_root && -n $_git_root ]] && break
+        [[ -z $d || $d == / ]] && break
+        d=${d%/*}
     done
 }
 
-### Renderers
-render_error() {
-    local cmd_status=$?
-    local label
-
-    if ! is_error "$cmd_status"; then
-       return 1;
+# Branch (or short hash) of $_git_root without running git. Result in REPLY.
+__git_branch() {
+    local gitdir=$_git_root/.git head
+    if [[ -f $gitdir ]]; then
+        { read -r head < "$gitdir"; } 2>/dev/null || return 1
+        gitdir=${head#gitdir: }
+        [[ $gitdir == /* ]] || gitdir=$_git_root/$gitdir
     fi
-
-    label="$cmd_status"
-    make_label "($label) " "$color_error";
+    { read -r head < "$gitdir/HEAD"; } 2>/dev/null || return 1
+    if [[ $head == "ref: "* ]]; then
+        REPLY=${head#ref: }
+        REPLY=${REPLY#refs/heads/}
+    else
+        REPLY=${head:0:7}
+    fi
 }
 
-render_identity() {
-    local label
+__prompt_command() {
+    local st=$? label out
 
-    if is_ssh; then
-        label="[ssh://] $USER@$HOSTNAME:"
-    elif is_su; then
-        label="$USER@$HOSTNAME:"
-    elif is_vcs; then
-        label="[$(get_vcs_project)]"
+    __find_vcs
+
+    # --- error ---
+    if (( st != 0 && st != 130 )); then
+        _ps_error="$_c_error($st) $_c_reset"
+    else
+        _ps_error=
+    fi
+
+    # --- identity ---
+    if [[ -n $_id_fixed ]]; then
+        label=$_id_fixed
+    elif [[ -n ${_jj_root:-$_git_root} ]]; then
+        out=${_jj_root:-$_git_root}
+        label="[${out##*/}]"
     else
         label="${HOSTNAME%%.*}:"
     fi
+    _ps_identity="$_c_main$_c_bold$label$_c_reset "
 
-    label="\001\033[1m\002$label\001\033[0m\002"
-    make_label "$label "
-}
-
-render_path() {
-    local label="\w"
-
-    # Rendering logic
-    printf "%s" "$label "
-}
-
-render_vcs() {
-    local label="" out
-    local is_git=0 is_jj=0
-
-    git rev-parse --is-inside-work-tree >/dev/null 2>&1 && is_git=1
-    jj root --ignore-working-copy >/dev/null 2>&1 && is_jj=1
-
-    # Not in any repository
-    (( is_git || is_jj )) || return 1
-
-    if (( is_git )); then
-        out=$(git symbolic-ref --short -q HEAD 2>/dev/null \
-            || git rev-parse --short HEAD 2>/dev/null)
-        [[ -n $out ]] && label="git/$out"
+    # --- vcs ---
+    label=
+    if [[ -n $_git_root ]] && __git_branch; then
+        label="git/$REPLY"
     fi
-
-    if (( is_jj )); then
+    if [[ -n $_jj_root ]] && command -v jj >/dev/null; then
         out=$(jj log --no-graph --ignore-working-copy --color never -r @ -T '
             separate(" ",
                 change_id.shortest(4),
@@ -112,99 +76,68 @@ render_vcs() {
             )' 2>/dev/null)
         [[ -n $out ]] && label+="${label:+ }jj/$out"
     fi
-
-    # Safe print
-    [[ -n $label ]] && printf "%s" "$(make_label "($label)" "$color_vcs")"
-}
-
-render_nvim() {
-    [[ -n "$NVIM" ]] || return 1
-    printf "%s " "$(make_label "(nvim)" "$color_neutral")"
-}
-
-render_nix() {
-    local label=""
-
-    if [[ -z ${IN_NIX_SHELL:-} && -z ${DEVENV_SHELL:-} \
-          && $PATH != /nix/store/* ]]; then
-        return 1
-    fi
-
-    label=${DEVENV_SHELL:-}
-    if [[ -z $label && -n ${IN_NIX_SHELL:-} && ${name:-} != nix-shell ]]; then
-        label=${name:-}
-    fi
-
-    printf "%s" "$(make_label "(nix${label:+/$label})" "$color_nix")"
-}
-
-render_prompt() {
-    local label="$"
-
-    if is_root; then
-        label='#'
-    fi
-
-    printf "%s " "$label"
-}
-
-### Helpers
-
-hex_to_ansi() {
-    local hex=${1#\#}
-    local include_bg=${2:-false}
-
-    local r=$((16#${hex:0:2}))
-    local g=$((16#${hex:2:2}))
-    local b=$((16#${hex:4:2}))
-
-    if $include_bg; then
-        printf "30;48;2;%s;%s;%s" "$r" "$g" "$b"
+    if [[ -n $label ]]; then
+        _ps_vcs="$_c_vcs($label)$_c_reset "
     else
-        printf "2;%s;%s;%s" "$r" "$g" "$b"
+        _ps_vcs=
+    fi
+
+    # --- nix ---
+    _ps_nix=
+    if [[ -n ${IN_NIX_SHELL:-} || -n ${DEVENV_SHELL:-} || $PATH == /nix/store/* ]]; then
+        label=${DEVENV_SHELL:-}
+        if [[ -z $label && -n ${IN_NIX_SHELL:-} && ${name:-} != nix-shell ]]; then
+            label=${name:-}
+        fi
+        _ps_nix="$_c_nix(nix${label:+/$label})$_c_reset "
+    fi
+
+    # --- nvim ---
+    if [[ -n $NVIM ]]; then
+        _ps_nvim="$_c_neutral(nvim)$_c_reset "
+    else
+        _ps_nvim=
+    fi
+
+    return "$st"   # keep $? intact for whatever hooks run after us
+}
+
+__prompt_init() {
+    # Colors (computed once)
+    __fg _c_error   "#EC6A88"
+    __fg _c_vcs     "#9ece6a"
+    __fg _c_nix     "#bb9af7"
+    __fg _c_neutral "#5f5f87"
+    if (( EUID == 0 )); then
+        __fg _c_main "#f7768e"
+    elif [[ -n $SSH_CLIENT ]]; then
+        __fg _c_main "#E8EDA2"
+    else
+        __fg _c_main "#00DFDF"
+    fi
+    _c_bold=$'\001\e[1m\002'
+    _c_reset=$'\001\e[0m\002'
+
+    # Parts of the identity label that never change during a session
+    _id_fixed=
+    if [[ -n $SSH_CLIENT ]]; then
+        _id_fixed="[ssh://] $USER@$HOSTNAME:"
+    elif [[ -n $LOGNAME && $USER != "$LOGNAME" ]]; then
+        _id_fixed="$USER@$HOSTNAME:"
+    fi
+
+    PS1='${_ps_error}${_ps_identity}\w ${_ps_vcs}${_ps_nix}${_ps_nvim}\$ '
+    PS2='→ '
+    PROMPT_DIRTRIM=2
+
+    # Run first so we see the real $? of the last command (bash >= 4.4)
+    if [[ ${PROMPT_COMMAND@a} == *a* ]]; then
+        [[ " ${PROMPT_COMMAND[*]} " == *" __prompt_command "* ]] ||
+            PROMPT_COMMAND=(__prompt_command "${PROMPT_COMMAND[@]}")
+    else
+        [[ ";$PROMPT_COMMAND;" == *";__prompt_command;"* ]] ||
+            PROMPT_COMMAND="__prompt_command${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
     fi
 }
 
-make_label() {
-    local content=$1
-    local color=${2:-$color_global}
-
-    # Prevent empty content
-    if [[ -z $content ]]; then return 1; fi
-
-    printf "\001\033[38;%sm\002" "$(hex_to_ansi "$color")"
-    printf "%b" "$content"
-    printf "\001\033[0m\002"
-}
-
-
-### Predicates
-
-is_root() { [[ $EUID -eq 0 ]]; }
-is_su() { [[ -n $LOGNAME && $USER != "$LOGNAME" ]]; }
-is_ssh() { [[ -n "$SSH_CLIENT" ]]; }
-is_error() { [[ $1 -ne 0 && $1 -ne 130 ]]; }
-is_vcs() { [[ -n $(get_vcs_project) ]];}
-
-# Get top-level repository name
-get_vcs_project() {
-    local root
-
-    if command -v jj > /dev/null 2>&1 \
-       && root=$(jj root --ignore-working-copy 2>/dev/null); then
-        printf "%s" "${root##*/}"
-        return 0
-    fi
-
-    if command -v git > /dev/null 2>&1 \
-       && root=$(git rev-parse --show-toplevel 2>/dev/null); then
-        printf "%s" "${root##*/}"
-        return 0
-    fi
-
-    return 1
-}
-
-### Initialize
-
-config && init
+__prompt_init
