@@ -104,24 +104,42 @@ __prompt_command() {
 
 __prompt_init() {
     # Colors (computed once)
-    __fg _c_error   "#EC6A88"
-    __fg _c_vcs     "#9ece6a"
-    __fg _c_nix     "#bb9af7"
-    __fg _c_neutral "#5f5f87"
+    # __fg _c_error   "#dd9999"
+    # __fg _c_vcs     "#5f8787"
+    # __fg _c_nix     "#7799bb"
+    # __fg _c_neutral "#404040"
+    # if (( EUID == 0 )); then
+    #     __fg _c_main "#79241f"
+    # elif [[ -n $SSH_CLIENT ]]; then
+    #     __fg _c_main "#e78a53"
+    # else
+    #     __fg _c_main "#eecc6c"
+    # fi
+    # _c_bold=$'\001\e[1m\002'
+    # _c_reset=$'\001\e[0m\002'
+
+    # Theme-aware colors: SGR codes, resolved by the terminal's palette
+    _sgr() { printf -v "$1" '\001\e[%sm\002' "$2"; }
+
+    _sgr _c_error   "31"      # red
+    _sgr _c_vcs     "32"      # green
+    _sgr _c_nix     "36"      # cyan
+    _sgr _c_neutral "2"       # dim: the theme's own foreground, faded
     if (( EUID == 0 )); then
-        __fg _c_main "#f7768e"
+        _sgr _c_main "7;31"   # inverse red block
     elif [[ -n $SSH_CLIENT ]]; then
-        __fg _c_main "#E8EDA2"
+        _sgr _c_main "33"     # yellow
     else
-        __fg _c_main "#00DFDF"
+        _sgr _c_main "38"
     fi
+    unset -f _sgr
     _c_bold=$'\001\e[1m\002'
     _c_reset=$'\001\e[0m\002'
 
     # Parts of the identity label that never change during a session
     _id_fixed=
     if [[ -n $SSH_CLIENT ]]; then
-        _id_fixed="[ssh://] $USER@$HOSTNAME:"
+        _id_fixed="[ssh] $USER@$HOSTNAME:"
     elif [[ -n $LOGNAME && $USER != "$LOGNAME" ]]; then
         _id_fixed="$USER@$HOSTNAME:"
     fi

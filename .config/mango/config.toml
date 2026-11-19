@@ -142,7 +142,6 @@ overlay_color = 0x95C381ff
 exec_once = [
     "swaybg -i /home/riccardo/Pictures/Wallpapers/wallhaven-mlo6my.png",
     "swayidle -w timeout 300 'swaylock' timeout 600 'wlr-randr --output eDP-1 --off' resume 'wlr-randr --output edP-1 --on'",
-    "foot --server",
     "wleave --service"
 ]
 
@@ -162,7 +161,7 @@ GLFW_IM_MODULE = "ibus"
 QT_QPA_PLATFORM = "Wayland;xcb"
 
 [var]
-term = "footclient"
+term = "ghostty"
 launcher = "fuzzel"
 
 [bind.default]
